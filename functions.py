@@ -1,3 +1,7 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import os
+import numpy as np
 class Minerale:
     def __init__(self, nome, x_vals, y_vals):
         self.nome = nome
@@ -12,11 +16,46 @@ class Minerali_da_riconoscere:
         self.x = x_vals
         self.y = y_vals
 
-import pandas as pd
-import matplotlib.pyplot as plt
-    
-def plot_unknown_minerals(nome,colonna,riga):
+def plot_minerale(minerale, ax=None):
+    ''' 
+        Voglio fare una funzione che mi permetta di plottare i minerali tabulati,
+        dando in input:
+        numero minerale(i) [LISTA]   -- es: ["Nontronite"] / ["Nontronite","Albite",...] !!DEV'ESSERE UN LISTA!!
+                                            o anche una stringa di int
+        ax: oggetto matplotlib.axes.Axes su cui plottare (opzionale)
+    '''
+    file = "/home/luca/Uni/VI/Data science/Progetto/prog_DS/data_norm_csv/minerali_norm.csv"
+    df = pd.read_csv(file)
 
+    # Se i minerali non sono stringhe, interpreta come indici
+    if not isinstance(minerale[0], str):
+        nomi = np.unique(df['nome'].values)
+        nomi = [nomi[j] for j in minerale]
+    else:
+        nomi = minerale
+
+    # Se non è passato un ax, creane uno nuovo
+    if ax is None:
+        fig, ax = plt.subplots(figsize=(10, 6))
+        show_plot = True
+    else:
+        show_plot = False  # evita plt.show() se lo gestisci fuori
+
+    for nome in nomi:
+        filtro = df[df['nome'] == nome]
+        ax.plot(filtro['x'].values, filtro['y'].values, marker='.', linestyle='-', label=nome)
+
+    ax.set_xlabel("lunghezza d'onda [cm^-1]")
+    ax.set_ylabel("Emissione")
+    ax.grid(True)
+    ax.legend()
+    ax.set_title("Spettri minerali selezionati")
+
+    if show_plot:
+        plt.show()
+
+def plot_unknown_minerals(nome, colonna, riga, ax=None):
+    
     ''' 
         Voglio fare una funzione che mi permetta di plottare i minerali da classificare,
         dando in input LISTE:
@@ -28,19 +67,28 @@ def plot_unknown_minerals(nome,colonna,riga):
 
         se non hai i file dentro la stessa cartella della funzione, non basta il nome del file,
         devi mettere tutto il percorso, es: "/home/luca/Uni/VI/Data science/Progetto/prog_DS/S1_bkg_mapA_11x11.csv"
-
+        - ax: oggetto matplotlib.axes.Axes su cui plottare (opzionale)
     '''
-
-
     for k in range(len(nome)):
+        df = pd.read_csv(nome[k])  # leggi file una sola volta per efficienza
+
         for i in colonna:
             for j in riga:
-                df = pd.read_csv(nome[k])
                 filtro = df[(df['colonna'] == i) & (df['riga'] == j)]
-                plt.figure(figsize=(10, 6))
-                plt.plot(filtro['x'].values, filtro['y'].values, marker='.', linestyle=None, color='blue')
-                plt.xlabel("lunghezza d'onda [cm^-1]")
-                plt.ylabel('Emissione')
-                plt.title(f"Colonna {i+1}, Riga {j+1} - {nome[k].removesuffix('.csv')}")
-                plt.grid(True)
-                plt.show()
+
+                # Se non è passato un ax, crea nuova figura
+                if ax is None:
+                    fig, ax_local = plt.subplots(figsize=(10, 6))
+                    show_plot = True
+                else:
+                    ax_local = ax
+                    show_plot = False
+
+                ax_local.plot(filtro['x'].values, filtro['y'].values, marker='.', linestyle='-', label=f"C{i+1}-R{j+1} [{os.path.basename(nome[k]).removesuffix('.csv')}]")
+                ax_local.set_xlabel("lunghezza d'onda [cm^-1]")
+                ax_local.set_ylabel("Emissione")
+                ax_local.set_title(f"Colonna {i+1}, Riga {j+1} - {os.path.basename(nome[k]).removesuffix('.csv')}")
+                ax_local.grid(True)
+                ax_local.legend()
+                if show_plot:
+                    plt.show()
