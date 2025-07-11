@@ -6,3 +6,6 @@ tre colonne, la prima con il nome del minerale, la seconda con i valori della x 
 Organizzati così:
 numero di riga, numero di colonna, x, y
 
+# Note su funzioni implementate:
+Funzione *plot_unknown_minerals*: permette di plottare i grafici dei materiali ignoti, in maniera più compatta, leggere le infos
+
