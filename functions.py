@@ -92,3 +92,9 @@ def plot_unknown_minerals(nome, colonna, riga, ax=None):
                 ax_local.legend()
                 if show_plot:
                     plt.show()
+
+def normalize(data):
+    '''
+    In input un ndarray
+    '''
+    return (data-data.mean() )/data.std()
